@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+class LRUcache{
+  public:
+    class Node{ // this can also be put outside of LRUcache class
+        public:    
+            int key;
+            int val;
+            Node* prev;
+            Node* next;
+        Node(int k,int v){
+            key=k;
+            val=v;
+            prev=NULL;
+            next=NULL;
+    }
+};
+    int cap;
+    unordered_map<int,Node*> m;
+    Node* head=new Node(-1,-1);
+    Node* tail=new Node(-1,-1);
+  LRUcache(int c){
+      cap=c;
+      head->next=tail;
+      tail->prev=head;
+  }
+  void deletenode(Node* temp){
+      Node* tempnxt=temp->next;
+      Node* tempprv=temp->prev;
+      tempprv->next=tempnxt;
+      tempnxt->prev=tempprv;
+  }
+  void addnode(Node* temp){
+      Node* temp2=head->next;
+      temp->next=temp2;
+      temp->prev=head;
+      head->next=temp;
+      temp2->prev=temp;
+  }
+  void put(int k,int v){
+      if(m.find(k)!=m.end()){
+          Node* newnode1=m[k];
+          m.erase(k);
+          deletenode(newnode1);
+          addnode(newnode1);
+          m[k]=head->next;
+      }
+      else{
+          if(m.size()==cap){
+              m.erase(tail->prev->key);
+              deletenode(tail->prev);
+              Node* newnode1=new Node(k,v);
+              addnode(newnode1);
+              m[k]=head->next;
+          }
+          else{
+              Node* newnode1=new Node(k,v);
+              addnode(newnode1);
+              m[k]=head->next;
+          }
+      }
+  }
+  int get(int k){
+      if(m.find(k)==m.end()){
+          return -1;
+      }
+      else{
+          Node* newnode1=m[k];
+          int res=newnode1->val;
+          m.erase(k);
+          deletenode(newnode1);
+          addnode(newnode1);
+          m[k]=head->next;
+          return res;
+      }
+  }
+  void display(){
+      for(auto i:m){
+        cout<<"key is "<<(i.second)->key<<" value is "<<(i.second)->val<<endl;
+      }
+  }
+};
+int main()
+{
+   LRUcache* ca=new LRUcache(4);
+   ca->put(2,3);
+   ca->put(4,5);
+   ca->put(7,6);
+   ca->put(1,4);
+   cout<<ca->get(4)<<endl;
+   cout<<ca->get(2)<<endl;
+   ca->put(8,5);
+   ca->put(9,2);
+   cout<<ca->get(8)<<endl;
+   ca->display();
+   return 0;
+}
